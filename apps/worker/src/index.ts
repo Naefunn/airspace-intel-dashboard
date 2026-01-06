@@ -1,3 +1,4 @@
+import "dotenv/config";
 import type { HealthPayload } from "@airspace/shared";
 
 const payload: HealthPayload = {
