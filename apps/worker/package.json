@@ -1,6 +1,7 @@
 {
   "name": "worker",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,6 +17,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "@airspace/db": "*",
+    "@airspace/shared": "*"
   }
 }
