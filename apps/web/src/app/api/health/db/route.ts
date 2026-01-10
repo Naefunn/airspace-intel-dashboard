@@ -2,7 +2,20 @@ import { prisma } from "@airspace/db";
 
 export async function GET() {
   try {
-    const pingCount = await prisma.ping.count();
+    const obsCount = await prisma.observation.count();
+
+    const latestObs = await prisma.observation.findFirst({
+      orderBy: { observedAt: "desc" },
+      select: {
+        observedAt: true,
+        aircraft: {
+          select: {
+            icao24: true,
+            callsign: true,
+          },
+        },
+      },
+    });
 
     const lastRun = await prisma.ingestRun.findFirst({
       orderBy: { startedAt: "desc" },
@@ -19,7 +32,8 @@ export async function GET() {
       ok: true,
       service: "web",
       db: "connected",
-      pingCount,
+      obsCount,
+      latestObs,
       lastRun,
       time: new Date().toISOString(),
     });

@@ -19,22 +19,40 @@ async function main() {
   console.log("worker alive", payload, { runId: run.id });
 
   try {
-    await prisma.ping.create({
-      data: { message: `worker ping @ ${payload.time}` },
+    // test data
+    const demoIcao24 = "40621B";
+    const demoCallsign = "BAW123";
+
+    const aircraft = await prisma.aircraft.upsert({
+      where: { icao24: demoIcao24 },
+      update: { callsign: demoCallsign },
+      create: { icao24: demoIcao24, callsign: demoCallsign },
     });
 
-    const pingCount = await prisma.ping.count();
+    await prisma.observation.create({
+      data: {
+        aircraftId: aircraft.id,
+        ingestRunId: run.id,
+        observedAt: new Date(),
+        lat: 55.9533,
+        lon: -3.1883,
+        altitudeM: 1200,
+        groundSpeedMs: 110,
+      },
+    });
+
+    const obsCount = await prisma.observation.count();
 
     await prisma.ingestRun.update({
       where: { id: run.id },
       data: {
         status: "SUCCESS",
         finishedAt: new Date(),
-        message: `inserted ping, total=${pingCount}`,
+        message: `inserted observation, total=${obsCount}`,
       },
     });
 
-    console.log("run success", { runId: run.id, pingCount });
+    console.log("run success", { runId: run.id, obsCount });
   } catch (err) {
     await prisma.ingestRun.update({
       where: { id: run.id },

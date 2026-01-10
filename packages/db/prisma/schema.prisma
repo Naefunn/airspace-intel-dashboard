@@ -13,21 +13,59 @@ datasource db {
 }
 
 model Ping {
-  id String @id @default(cuid())
-  message String 
+  id        String   @id @default(cuid())
+  message   String
   createdAt DateTime @default(now())
 }
 
 model IngestRun {
-  id String @id @default(cuid())
-  startedAt DateTime @default(now())
+  id         String       @id @default(cuid())
+  startedAt  DateTime     @default(now())
   finishedAt DateTime?
-  status IngestStatus @default(RUNNING)
-  message String?
+  status     IngestStatus @default(RUNNING)
+  message    String?
+
+  observations Observation[]
 }
 
 enum IngestStatus {
-  RUNNING 
-  SUCCESS 
+  RUNNING
+  SUCCESS
   FAILED
+}
+
+model Aircraft {
+  id       String  @id @default(cuid())
+  icao24   String? @unique
+  callsign String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  observations Observation[]
+}
+
+model Observation {
+  id String @id @default(cuid())
+
+  // when observed, not inserted
+  observedAt DateTime
+
+  lat           Float?
+  lon           Float?
+  altitudeM     Float? // in meters
+  groundSpeedMs Float?
+
+  createdAt DateTime @default(now())
+
+  aircraft Aircraft @relation(fields: [aircraftId], references: [id], onDelete: Cascade)
+
+  aircraftId String
+
+  ingestRun IngestRun? @relation(fields: [ingestRunId], references: [id], onDelete: SetNull)
+
+  ingestRunId String?
+
+  @@index([observedAt])
+  @@index([aircraftId, observedAt])
 }
