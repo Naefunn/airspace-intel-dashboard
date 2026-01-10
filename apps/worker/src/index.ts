@@ -1,6 +1,6 @@
 import "dotenv/config";
-import type { HealthPayload } from "@airspace/shared";
 import { prisma } from "@airspace/db";
+import type { HealthPayload } from "@airspace/shared";
 
 async function main() {
   const payload: HealthPayload = {
@@ -9,27 +9,49 @@ async function main() {
     service: "worker",
   };
 
-  // 1) Write one row (proves worker -> DB)
-  const inserted = await prisma.ping.create({
-    data: { message: `worker ping @ ${payload.time}` },
+  const run = await prisma.ingestRun.create({
+    data: {
+      status: "RUNNING",
+      message: "starting",
+    },
   });
 
-  // 2) Read a tiny aggregate (proves DB -> worker)
-  const pingCount = await prisma.ping.count();
+  console.log("worker alive", payload, { runId: run.id });
 
-  console.log("worker alive", payload);
-  console.log("inserted ping", {
-    id: inserted.id,
-    createdAt: inserted.createdAt,
-  });
-  console.log("pingCount", pingCount);
+  try {
+    await prisma.ping.create({
+      data: { message: `worker ping @ ${payload.time}` },
+    });
+
+    const pingCount = await prisma.ping.count();
+
+    await prisma.ingestRun.update({
+      where: { id: run.id },
+      data: {
+        status: "SUCCESS",
+        finishedAt: new Date(),
+        message: `inserted ping, total=${pingCount}`,
+      },
+    });
+
+    console.log("run success", { runId: run.id, pingCount });
+  } catch (err) {
+    await prisma.ingestRun.update({
+      where: { id: run.id },
+      data: {
+        status: "FAILED",
+        finishedAt: new Date(),
+        message: err instanceof Error ? err.message : String(err),
+      },
+    });
+
+    throw err;
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
-main()
-  .catch((err) => {
-    console.error("worker error", err);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main().catch((err) => {
+  console.error("worker error", err);
+  process.exitCode = 1;
+});

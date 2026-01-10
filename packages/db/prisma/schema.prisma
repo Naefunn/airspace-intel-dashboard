@@ -17,3 +17,17 @@ model Ping {
   message String 
   createdAt DateTime @default(now())
 }
+
+model IngestRun {
+  id String @id @default(cuid())
+  startedAt DateTime @default(now())
+  finishedAt DateTime?
+  status IngestStatus @default(RUNNING)
+  message String?
+}
+
+enum IngestStatus {
+  RUNNING 
+  SUCCESS 
+  FAILED
+}

@@ -1,16 +1,26 @@
 import { prisma } from "@airspace/db";
 
-console.log("WEB DATABASE_URL:", process.env.DATABASE_URL);
-
 export async function GET() {
   try {
     const pingCount = await prisma.ping.count();
+
+    const lastRun = await prisma.ingestRun.findFirst({
+      orderBy: { startedAt: "desc" },
+      select: {
+        id: true,
+        status: true,
+        startedAt: true,
+        finishedAt: true,
+        message: true,
+      },
+    });
 
     return Response.json({
       ok: true,
       service: "web",
       db: "connected",
       pingCount,
+      lastRun,
       time: new Date().toISOString(),
     });
   } catch (err) {
