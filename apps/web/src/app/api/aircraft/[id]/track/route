@@ -1,0 +1,49 @@
+import { prisma } from "@airspace/db";
+
+const DEFAULT_MINUTES = 10;
+const DEFAULT_LIMIT = 300;
+const MAX_LIMIT = 2000;
+
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const url = new URL(req.url);
+
+  const minutes = Math.max(
+    1,
+    Math.min(24 * 60, Number(url.searchParams.get("limit") ?? DEFAULT_LIMIT))
+  );
+
+  const limit = Math.max(
+    1,
+    Math.min(MAX_LIMIT, Number(url.searchParams.get("limit") ?? DEFAULT_LIMIT))
+  );
+
+  const since = new Date(Date.now() - minutes * 60 * 1000);
+
+  const rows = await prisma.observation.findMany({
+    where: {
+      aircraftId: params.id,
+      observedAt: { gte: since },
+    },
+    orderBy: { observedAt: "asc" },
+    take: limit,
+    select: {
+      id: true,
+      observedAt: true,
+      lat: true,
+      lon: true,
+      altitudeM: true,
+      groundSpeedMs: true,
+    },
+  });
+
+  return Response.json({
+    ok: true,
+    count: rows.length,
+    rows,
+    aircraftId: params.id,
+    windowMinutes: minutes,
+  });
+}

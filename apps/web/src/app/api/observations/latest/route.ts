@@ -5,6 +5,7 @@ export async function GET() {
     orderBy: { observedAt: "desc" },
     take: 20,
     select: {
+      id: true,
       observedAt: true,
       lat: true,
       lon: true,

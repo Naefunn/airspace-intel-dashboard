@@ -25,10 +25,11 @@ type HealthDb = {
   error?: string;
 };
 
-type LatestObs = {
+type LatestAircraftStateResp = {
   ok: boolean;
   count: number;
   rows: Array<{
+    aircraftId: string;
     observedAt: string;
     lat: number | null;
     lon: number | null;
@@ -36,6 +37,21 @@ type LatestObs = {
     groundSpeedMs: number | null;
     ingestRunId: string | null;
     aircraft: { icao24: string | null; callsign: string | null };
+  }>;
+};
+
+type TrackResp = {
+  ok: boolean;
+  count: number;
+  aircraftId: string;
+  windowMinutes: number;
+  rows: Array<{
+    id: string;
+    observedAt: string;
+    lat: number | null;
+    lon: number | null;
+    altitudeM: number | null;
+    groundSpeedMs: number | null;
   }>;
 };
 
@@ -52,21 +68,25 @@ function formatNumber(n?: number | null, digits = 0) {
 
 export default function DashboardPage() {
   const [health, setHealth] = useState<HealthDb | null>(null);
-  const [obs, setObs] = useState<LatestObs | null>(null);
+  const [obs, setObs] = useState<LatestAircraftStateResp | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedAircraftId, setSelectedAircraftId] = useState<string | null>(
+    null
+  );
+  const [track, setTrack] = useState<TrackResp | null>(null);
 
   async function refresh() {
     try {
       setError(null);
       const [hRes, oRes] = await Promise.all([
         fetch("/api/health/db", { cache: "no-store" }),
-        fetch("/api/observations/latest", { cache: "no-store" }),
+        fetch("/api/aircraft/latest", { cache: "no-store" }),
       ]);
 
       const hJson = (await hRes.json()) as HealthDb;
-      const oJson = (await oRes.json()) as LatestObs;
+      const oJson = (await oRes.json()) as LatestAircraftStateResp;
 
       setHealth(hJson);
       setObs(oJson);
@@ -76,6 +96,14 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function loadTrack(aircraftId: string) {
+    const res = await fetch(`/api/aircraft/${aircraftId}/track?minutes=10`, {
+      cache: "no-store",
+    });
+    const json = (await res.json()) as TrackResp;
+    setTrack(json);
   }
 
   useEffect(() => {
@@ -102,7 +130,7 @@ export default function DashboardPage() {
           <p className="text-zinc-400">
             Live status from{" "}
             <code className="text-zinc-200">/api/health/db</code> and{" "}
-            <code className="text-zinc-200">/api/observations/latest</code>.
+            <code className="text-zinc-200">/api/aircraft/latest</code>.
           </p>
         </header>
 
@@ -204,7 +232,7 @@ export default function DashboardPage() {
                 href="/api/observations/latest"
                 className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm hover:bg-zinc-800 inline-block"
               >
-                View latest JSON
+                View raw observation JSON
               </a>
             </div>
           </div>
@@ -212,7 +240,7 @@ export default function DashboardPage() {
 
         <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-medium">Latest observations</h2>
+            <h2 className="font-medium">Latest aircraft states</h2>
             <div className="text-sm text-zinc-400">
               {loading ? "Loading…" : `${obs?.count ?? 0} rows`}
             </div>
@@ -234,8 +262,17 @@ export default function DashboardPage() {
               <tbody>
                 {(obs?.rows ?? []).map((r) => (
                   <tr
-                    key={`${r.ingestRunId ?? "none"}-${r.observedAt}`}
-                    className="border-b border-zinc-900"
+                    key={r.aircraftId}
+                    onClick={() => {
+                      setSelectedAircraftId(r.aircraftId);
+                      loadTrack(r.aircraftId);
+                    }}
+                    className={[
+                      "border-b border-zinc-900 cursor-pointer hover:bg-zinc-900/60",
+                      selectedAircraftId === r.aircraftId
+                        ? "bg-zinc-900/60"
+                        : "",
+                    ].join(" ")}
                   >
                     <td className="py-2 pr-4 whitespace-nowrap">
                       {formatIso(r.observedAt)}
