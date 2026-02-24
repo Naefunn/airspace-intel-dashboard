@@ -41,6 +41,18 @@ async function main() {
       },
     });
 
+    await prisma.observation.create({
+      data: {
+        aircraftId: aircraft.id,
+        ingestRunId: run.id,
+        observedAt: new Date(),
+        lat: 55.9533,
+        lon: -3.1883,
+        altitudeM: 200,
+        groundSpeedMs: 140,
+      },
+    });
+
     const obsCount = await prisma.observation.count();
 
     await prisma.ingestRun.update({
