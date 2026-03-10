@@ -1,7 +1,6 @@
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#070A0F] text-zinc-100">
-      {/* Background */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:48px_48px]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.14),transparent_55%)]" />
@@ -10,7 +9,6 @@ export default function Home() {
       </div>
 
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-6">
-        {/* Nav */}
         <header className="flex items-center justify-between rounded-2xl border border-zinc-800 bg-zinc-900/25 px-4 py-3 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] backdrop-blur">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900/40">
@@ -53,7 +51,6 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Hero */}
         <section className="grid flex-1 grid-cols-1 gap-8 py-10 lg:grid-cols-2 lg:items-center lg:py-16">
           <div className="max-w-2xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-900/40 bg-sky-950/20 px-3 py-1 text-xs uppercase tracking-[0.2em] text-sky-200">
@@ -130,7 +127,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero visual */}
           <div className="relative">
             <div className="overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/30 p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] backdrop-blur">
               <div className="rounded-2xl border border-zinc-800 bg-[#05080D] p-4">
@@ -228,7 +224,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Capabilities */}
         <section id="capabilities" className="py-6">
           <div className="mb-6">
             <div className="text-[11px] uppercase tracking-[0.22em] text-zinc-500">
@@ -277,7 +272,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* How it works */}
         <section id="how-it-works" className="py-6">
           <div className="mb-6">
             <div className="text-[11px] uppercase tracking-[0.22em] text-zinc-500">
@@ -324,7 +318,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Overview / CTA */}
         <section id="overview" className="py-6 pb-10">
           <div className="rounded-3xl border border-zinc-800 bg-zinc-900/25 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.02)] backdrop-blur md:p-8">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.4fr_0.9fr] lg:items-center">
@@ -391,7 +384,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Footer */}
         <footer className="border-t border-zinc-900 py-6 text-sm text-zinc-500">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p>Airspace Intel</p>
